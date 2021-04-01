@@ -1,0 +1,85 @@
+---
+title: "Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Load and library data 
+https://smltar.com/tokenization.html
+```{r}
+library(tidymodels)
+library(dplyr)
+library(lubridate)
+library(naniar)
+library(tableone)
+library(DALEX)
+library(doParallel)
+library(stringr)
+library(DALEXtra)
+library(mlr)
+library(tokenizers)
+library(tidyverse)
+library(tidytext)
+library(hcandersenr)
+library(stopwords)
+library(SnowballC) 
+library(quanteda)
+all_cores <- parallel::detectCores(logical = FALSE)
+registerDoParallel(cores = all_cores)
+```
+Load in the data 
+```{r}
+setwd("~/Google Drive/Cook")
+text_dat = read.csv("20210309_atc_mlk_collins_fauci_full.csv", header = TRUE)
+text_dat = text_dat %>%
+  select(Text, Speaker)
+text_dat$id = 1:dim(text_dat)[1]
+```
+Try tokenizing 
+```{r}
+
+text_token = tokenize_words(text_dat$Text)
+text_dat_eval = text_dat %>%
+  select(Text) %>%
+  tibble() %>%
+  rename(text = Text)
+text_dat_eval  
+text_dat_eval
+unnest_tokens(text_dat_eval,word, text, token = "words", strip_punct = )
+
+
+
+```
+Try counting the number of words
+```{r}
+text_dat %>%
+  unnest_tokens(word, Text) %>%
+  count(Speaker, word) %>%
+  group_by(Speaker) %>%
+   arrange(desc(n))
+``` 
+Now remove stopwords and setm
+```{r}
+text_dat_clean = text_dat %>%
+  #Make each word its own row
+  unnest_tokens(word, Text) %>%
+  ## Remove stop words
+  anti_join(get_stopwords(source = "snowball")) %>%
+  ## Stem words
+  mutate(word = wordStem(word))
+  
+text_dat_clean
+```
+Count words without stop words
+Term frequency: How often that term is used in a document which in this case is the 
+```{r}
+text_dat_clean_count = text_dat_clean %>%
+    group_by(id) %>%
+  count(word, sort = TRUE) %>%
+  cast_dfm(id, word, n)
+text_dat_clean_count
+```
+
+
