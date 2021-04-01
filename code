@@ -26,6 +26,7 @@ library(hcandersenr)
 library(stopwords)
 library(SnowballC) 
 library(quanteda)
+library(textrecipes)
 all_cores <- parallel::detectCores(logical = FALSE)
 registerDoParallel(cores = all_cores)
 ```
@@ -80,6 +81,53 @@ text_dat_clean_count = text_dat_clean %>%
   count(word, sort = TRUE) %>%
   cast_dfm(id, word, n)
 text_dat_clean_count
+
 ```
+Now try deep learning with example
+```{r}
+set.seed(1234)
+ks_split= ks_dat %>%
+  filter(nchar(name) >= 15) %>%
+  initial_split()
+ks_train = training(ks_split)
+ks_test = testing(ks_split)
+
+```
+We need to select the sequence so the length of documents we want to include.  For sequences that are shorter than our selected length they include padding (i.e., zeros) and longer documents are cut off.
+
+Limit the sequence length (number of words per sequence) to 15 
+Then limit the total number of words to 20,000 
+```{r}
+library(textrecipes)
+ks_train %>%
+  mutate(n_words = tokenizers::count_words(name)) %>%
+  ggplot(aes(n_words)) +
+  geom_bar() +
+  labs(x = "Number of words per campaign blurb",
+       y = "Number of campaign blurbs")
+
+
+
+
+```
+Now get the recipe ready
+The number of rows is the number of rows in the original data set
+The number of columns is the number the max_length per sequence (i.e., the row).
+The numbers are the indexes for the words in alphabetical order.  If the sequence (i.e., original row of data) only contained three words then only the last 28 columns (i.e., sequences) will contain numbers.
+```{r}
+max_words <- 20000
+max_length <- 30
+
+kick_rec <- recipe(~ name, data = ks_train) %>%
+  step_tokenize(name)  %>%
+  step_tokenfilter(name, max_tokens = max_words) %>%
+  step_sequence_onehot(name, sequence_length = max_length)
+kick_prep <-  prep(kick_rec)
+kick_train <- bake(kick_prep, new_data = NULL, composition = "matrix")
+kick_train
+```
+
+
+Now try scrapping twitter data and conducting sentiment analysis
 
 
