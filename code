@@ -9,13 +9,13 @@ knitr::opts_chunk$set(echo = TRUE)
 Load and library data 
 https://smltar.com/tokenization.html
 ```{r}
+rm(list = ls())
 library(tidymodels)
 library(dplyr)
 library(lubridate)
 library(naniar)
 library(tableone)
 library(DALEX)
-library(doParallel)
 library(stringr)
 library(DALEXtra)
 library(mlr)
@@ -135,10 +135,23 @@ dense_model <- keras_model_sequential() %>%
                   output_dim = 12,
                   input_length = max_length) %>%
   layer_flatten() %>%
-  layer_dense(units = 32, activation = "relu") %>%
+
   layer_dense(units = 1, activation = "sigmoid")
 
 dense_model
+```
+Try just an example to see if Keras words
+```{r}
+training_id <- sample.int(nrow(df), size = nrow(df)*0.8)
+training <- df[training_id,]
+testing <- df[-training_id,]
+
+num_words <- 10000
+max_length <- 50
+text_vectorization <- layer_text_vectorization(
+  max_tokens = num_words, 
+  output_sequence_length = max_length)
+
 ```
 
 
