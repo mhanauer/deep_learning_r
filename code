@@ -27,6 +27,8 @@ library(stopwords)
 library(SnowballC) 
 library(quanteda)
 library(textrecipes)
+library(keras)
+library(textrecipes)
 all_cores <- parallel::detectCores(logical = FALSE)
 registerDoParallel(cores = all_cores)
 ```
@@ -34,6 +36,7 @@ Load in the data
 ```{r}
 setwd("~/Google Drive/Cook/data")
 text_dat = read.csv("20210309_atc_mlk_collins_fauci_full.csv", header = TRUE)
+ks_dat = read_csv("ks-projects-201801.csv")
 text_dat = text_dat %>%
   select(Text, Speaker)
 text_dat$id = 1:dim(text_dat)[1]
@@ -98,7 +101,7 @@ We need to select the sequence so the length of documents we want to include.  F
 Limit the sequence length (number of words per sequence) to 15 
 Then limit the total number of words to 20,000 
 ```{r}
-library(textrecipes)
+
 ks_train %>%
   mutate(n_words = tokenizers::count_words(name)) %>%
   ggplot(aes(n_words)) +
@@ -125,6 +128,10 @@ kick_rec <- recipe(~ name, data = ks_train) %>%
 kick_prep <-  prep(kick_rec)
 kick_train <- bake(kick_prep, new_data = NULL, composition = "matrix")
 kick_train
+```
+Try putting together a model
+```{r}
+
 ```
 
 
