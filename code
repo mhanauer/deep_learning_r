@@ -31,7 +31,7 @@ registerDoParallel(cores = all_cores)
 ```
 Load in the data 
 ```{r}
-setwd("~/Google Drive/Cook")
+setwd("~/Google Drive/Cook/data")
 text_dat = read.csv("20210309_atc_mlk_collins_fauci_full.csv", header = TRUE)
 text_dat = text_dat %>%
   select(Text, Speaker)
@@ -73,7 +73,7 @@ text_dat_clean = text_dat %>%
 text_dat_clean
 ```
 Count words without stop words
-Term frequency: How often that term is used in a document which in this case is the 
+Term frequency: How often that term is used in a document which in this case is the change in speaker
 ```{r}
 text_dat_clean_count = text_dat_clean %>%
     group_by(id) %>%
